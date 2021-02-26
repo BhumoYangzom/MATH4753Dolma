@@ -1,0 +1,118 @@
+---
+title: "Applied Statistics: Lab 2"
+author: "Yangzom Dolma"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+---
+
+# Task 1
+
+```{r}
+getwd()
+```
+
+# Task 2
+
+```{r}
+epagas = read.csv("EPAGAS.csv")
+head(epagas)
+```
+
+# Task 3
+
+Make the object mpg, the number of miles per gallon vector.
+
+```{r}
+mpg <- epagas$MPG
+head(mpg)
+```
+
+z-score of MPG: 
+```{r}
+z = (mpg - mean(mpg))/sd(mpg)
+head(z)
+```
+
+Verifying that mean(z) = 0 and that standard deviation of z is 1.
+
+```{r}
+round(mean(z))
+sd(z)
+```
+
+Possible outliers for the values of mpg: 
+
+```{r}
+poutliers = mpg[abs(z) >= 2 & abs(z) <= 3]
+poutliers
+```
+
+The values of mpg that are outliers: 
+
+```{r}
+outlier = mpg[abs(z) > 3]
+outlier
+```
+
+Dotplot using lattice package: 
+
+```{r}
+library(lattice)
+mpgplot = ifelse(abs(z) > 3, "red", 
+                 ifelse(abs(z) >=2 & abs(z) <= 3, "blue", "black"))
+dotplot(mpg, col = mpgplot, main = "Dotplot of MPG")
+```
+
+# Task 4
+
+Boxplot of MPG data: 
+
+```{r}
+boxplot(mpg, 
+        main = "Boxplot of MPG",
+        col = "black",
+        xlab = "MPG",
+        horizontal = TRUE,
+        notch = TRUE)
+```
+
+### Chebyshev's Theorem
+
+Using Chebyshev's Theorem: Proportion of MPG data within 2 standard deviations of the mean. 
+
+```{r}
+k = 2
+ch = (1 - 1/k^2)
+ch
+```
+
+Using R: Proportion of MPG data within 2 standard deviations of the mean.
+
+```{r}
+twoSD = mpg[abs(z) < 2]
+exact = length(twoSD)/length(mpg)
+exact
+```
+
+Does Chebyshev agree with the data?
+
+Ans: Yes, Chebyshev agree with the data. Chebyshev indicates that at least 75% of the MPG data will be within 2 standard deviations of the mean. The exact proportion of data within 2 standard deviations of the mean is found to be 96% which is more than 75%. 
+
+### Empirical Rule
+
+According to the empirical rule, approximately 95% of the data should be within 2 standard deviations of the mean of the data. 
+
+In this case, we found that 96% of the data is within 2 standard deviations of the mean, which correspond approximately close to 95%. 
+
+Density Distribution Plot of MPG data: 
+
+```{r}
+plot(density(mpg), main = "Empirical Distribution of MPD Data", col = "blue")
+abline (v = mean(mpg), col = "green")
+```
+
+The density distribution plot of MPG data is mound-shaped and has symmetric distribution. Therefore,in this case the empirical rule is valid. 
+

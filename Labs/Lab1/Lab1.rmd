@@ -1,0 +1,233 @@
+---
+title: "Math 4753 Lab1: Introduction to R"
+author: "Yangzom Dolma"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+---
+
+# Task 1
+
+The working directory: 
+
+```{r}
+getwd() 
+```
+
+# Task 2
+
+First six lines of data. 
+
+```{r}
+ddt = read.csv("DDT.csv") 
+head(ddt) 
+```
+# Task 3
+
+a. The qualitative variables in ddt data set are:
+
+Ans: RIVER and SPECIES. 
+
+b. The quantitative variables in the ddt data set are: 
+
+Ans: MILE, LENGTH, WEIGHT and DDT. 
+
+c. Number of species in the ddt data set.  
+
+Ans. 3 Species.
+
+```{r}
+df<-with(ddt, SPECIES) 
+df_unique<-unique(df) 
+length(df_unique) 
+```
+
+d. Subset the ddt data set so that we see only the observations with SPECIES,  LMBASS and WEIGHT bigger than 800gms. 
+```{r}
+ddt_subset<-with(ddt, ddt[WEIGHT>800 & SPECIES=="LMBASS",]) 
+head (ddt_subset) 
+```
+
+e. Subset the ddt data set so that we see only those observations where the RIVER is SCM   and DDT bigger than 4.0
+
+```{r}
+ddt_river <- with(ddt, ddt[DDT > 4.0 & RIVER == "SCM",]) 
+head (ddt_river) 
+```
+
+# Clicker Questions
+
+Q1. The mean length of fish in the ddt data frame. 
+
+Ans: 42.81 length unit. 
+
+```{r}
+z<-mean(ddt$LENGTH) 
+z 
+```
+
+
+Q2. What is the standard deviation of the weight of fish in the ddt data frame?
+
+Ans: 376.5461
+
+```{r}
+x <- sd(ddt$WEIGHT) 
+x  
+```
+
+
+Q3. Is this the plot of LENGTH vs WEIGHT from the ddt data frame? 
+
+Ans:  1 = Yes
+
+Q4. If v=1:20 what is the last value of v/20?
+
+Ans: 1.00
+
+```{r}
+v = 1:20  
+v/20 
+```
+
+
+# Task 4: Table and Barplot
+
+a. Table of the rivers.
+
+```{r}
+RiverTable = table(ddt$RIVER) 
+print(RiverTable) 
+```
+
+b. Color coded barplot of the rivers.
+
+```{r}
+barplot(table(ddt$RIVER), col = 1:4) 
+```
+
+
+c. Table of the RIVERS crossed with the SPECIES of fish.
+
+```{r}
+tableRS <- with(ddt, table(SPECIES, RIVER)) 
+print(tableRS) 
+```
+
+d. Barplot of the RIVER crossed with the SPECIES of fish.
+
+```{r}
+barplot(tableRS, col = rainbow(3),
+        main = "Barplot",
+        border = "Black"
+        )
+```
+
+# Task 5: Pie Chart
+
+a. Pie chart of Fish SPECIES
+
+```{r}
+fish = ddt$SPECIES 
+pie (table(fish)) 
+```
+
+b. Pie chart of RIVERS
+
+```{r}
+rivers = ddt$RIVER 
+pie (table(rivers)) 
+```
+
+
+# Task 6: Boxplot
+
+a. Boxplot of the variable DDT
+
+```{r}
+boxplot(ddt$DDT, 
+        main = "Boxplot of DDT",
+        xlab = "dbl",
+        ylab = "DDT", 
+        col = "Orange",
+        border = "brown",
+        horizontal = TRUE,
+        notch = TRUE
+) 
+```
+
+b. Boxplot of the variable WEIGHT
+
+```{r}
+boxplot(ddt$WEIGHT, 
+        main = "Boxplot of WEIGHT",
+        xlab = "weight unit",
+        ylab = "WEIGHT", 
+        col = "Orange",
+        border = "brown",
+        horizontal = TRUE,
+        notch = TRUE
+) 
+```
+
+
+c. Boxplot of the variable LENGTH
+
+```{r}
+boxplot(ddt$LENGTH, 
+        main = "Boxplot of LENGTH",
+        xlab = "Length unit",
+        ylab = "LENGTH", 
+        col = "Orange",
+        border = "brown",
+        horizontal = TRUE,
+        notch = TRUE
+) 
+```
+
+
+# Task 7: Coplot
+
+a. Coplot of LENGTH Vs WEIGHT given RIVER
+
+```{r}
+coplot(LENGTH ~ WEIGHT | RIVER, 
+       data=ddt, 
+       col = with(ddt, ifelse (SPECIES == "CCATFISH", "Pink",
+                  ifelse(SPECIES == "SMBUFFALO", "Green", "Orange")))) 
+```
+
+
+b. Coplot of DDT vs WEIGHT given SPECIES
+
+
+```{r}
+coplot(DDT ~ WEIGHT | SPECIES, data = ddt) 
+```
+
+
+# Task 8: ggplot: Box, Violin, Scatter
+
+a. ggplot: Boxplot for WEIGHT vs SPECIES
+
+```{r}
+library(ggplot2)
+ggplot(ddt, ggplot2::aes(x=SPECIES, y=WEIGHT)) + geom_boxplot(aes(fill=RIVER)) + ggtitle("Yangzom Dolma") 
+```
+b. ggplot: Violin Plot for LENGTH vs RIVER
+
+```{r}
+print(ggplot(ddt, aes(x=RIVER, y = LENGTH)) + geom_violin(aes(fill =SPECIES)) + ggtitle("Yangzom Dolma")) 
+```
+c. ggplot: Scatter Plot for LENGTH vs WEIGHT
+
+```{r}
+ggsc = ggplot(ddt, aes(x= WEIGHT, y = LENGTH))
+
+ggsc = ggsc + geom_point(aes(color = SPECIES)) + ggtitle("Yangzom Dolma")
+
+print(ggsc)
+```
+

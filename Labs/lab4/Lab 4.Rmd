@@ -1,0 +1,452 @@
+---
+title: "Lab 4: MATH 4753"
+author: "Yangzom Dolma"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+---
+
+# Task 1
+
+Working Directory:
+```{r}
+getwd()
+```
+
+# Task 2
+
+```{r}
+spruce.df = read.csv("SPRUCE.csv")
+tail(spruce.df)
+```
+
+# Task 3
+
+## Lowess smoother scatter plot (Height vs. BHDiameter)
+
+```{r}
+library(s20x)
+trendscatter(Height ~ BHDiameter, data = spruce.df, f = 0.5)
+```
+
+## Linear Model Object
+
+```{r}
+# Make the linear model
+spruce.lm = with(spruce.df, lm(Height ~ BHDiameter))
+summary(spruce.lm)
+```
+
+## Residuals object
+
+```{r}
+#residuals  created from the linear model object
+height.res=residuals(spruce.lm)
+height.res
+```
+
+## Fitted values object
+
+```{r}
+#fitted values made from the linear model object
+height.fit=fitted(spruce.lm)
+height.fit
+```
+
+## Residuals vs. Fitted values plot
+
+```{r}
+plot(height.fit,height.res)
+```
+
+## Residuals vs. Fitted (trendscatter)
+
+```{r}
+# Put a lowess smoother through residual vs fitted
+trendscatter( height.fit,height.res)
+```
+# Trendscatter
+
+## What shape is seen in plot? 
+
+The plot is parabolic, it is more symmetrical than the first plot. 
+
+After the peak, the blue line moves downward. On the other hand, in the first plot, the slope stays positive and becomes flatter. 
+
+## Residual plot
+
+```{r}
+# Quick way to make a residual plot
+plot(spruce.lm, which =1)
+```
+
+## Normality and Shapiro-Wilk test
+
+```{r}
+normcheck(spruce.lm,shapiro.wilk = TRUE)
+```
+
+## pvalue and NULL hypothesis 
+
+The p-value is 0.29 which is greater than 0.05. Therefore, this accepts the Null Hypothesis and says that the error is distributed normally.
+
+We should expect residuals that are approximately normal in distribution with a mean value of 0 and a constant variance. This is according to this lab's instruction. 
+
+## Conclusion 
+
+We should use a straight model. The shape has a quadratic shape, therefore we must properly adjuct the model used. 
+
+# Task 4
+
+## Quadratic Fit
+
+```{r}
+quad.lm=lm(Height~BHDiameter + I(BHDiameter^2),data=spruce.df)
+summary(quad.lm)
+```
+
+## Fresh Scatter plot and quadratic curve
+
+Intercept and slope: 
+
+```{r}
+coef(quad.lm)
+```
+
+Plot of Height vs. BHDiameter and the quadratic curve: 
+```{r}
+plot(spruce.df)
+
+myplot=function(x){
+ quad.lm$coef[1] +quad.lm$coef[2]*x  + quad.lm$coef[3]*x^2
+ } 
+ 
+curve(myplot, lwd=2, col="steelblue",add=TRUE)
+```
+
+## A vector of fitted values
+
+```{r}
+quad.fit = fitted(quad.lm)
+quad.fit
+```
+
+## Residuals vs. fitted plot
+
+Using quad.lm: 
+
+```{r}
+plot(spruce.lm, which =1)
+```
+
+## Normality Check
+
+Construct a QQ plot using normcheck(): 
+
+```{r}
+normcheck(spruce.lm,shapiro.wilk = TRUE)
+```
+
+## Conclusion 
+
+The p-value is 0.684 which is greater than 0.05. Therefore, the Null Hypothesis applies. 
+
+According to the residual vs fitted values plot from quad.lm, the trend is not very present there. We can say that the quadratic model describes the data better than the linear model. 
+
+# Task 5
+
+## Summarize quad.lm
+
+```{r}
+summary(quad.lm)
+```
+
+
+## Interval Estimates
+
+```{r}
+ciReg(quad.lm)
+```
+
+## Equation of the fitted line
+
+$$Height = 0.860896 + 1.469592 x - 0.027457 x^2 $$
+
+## Predict Height of Spruce
+
+When the Diameter is 15 cm , 18 cm and 20 cm: 
+
+```{r}
+# predict height for diameter values
+predict(quad.lm, data.frame(BHDiameter=c(15,18,20)))
+```
+
+## Height Comparison
+
+```{r}
+predict(spruce.lm, data.frame(BHDiameter=c(15,18,20)))
+```
+
+The prediction by quad.lm is not only larger than spruce.lm's prediction but it also indicates a quadratic growth. 
+
+## Multiple-R-Squared
+
+### quad.lm 
+
+```{r}
+summary(quad.lm)$r.squared
+```
+
+Therefore, r^2 = 0.7741266 for quad.lm. 
+
+### spruce.lm
+```{r}
+summary(spruce.lm)$r.squared
+```
+
+Therefore, r^2 = 0.6569146 for spruce.lm. 
+
+## Adjusted R^2 and model comparison
+
+### quad.lm
+
+```{r}
+summary(quad.lm)$adj.r.squared
+```
+
+### spruce.lm
+
+```{r}
+summary(spruce.lm)$adj.r.squared
+```
+
+## Meaning of Multiple-R-Squared
+
+The multiple-R-Squared value describes how well the spruce.lm and quad.lm models are. 
+
+## Model: Most variability in Height
+
+```{r}
+summary(quad.lm)$r.squared
+```
+
+## anova
+
+```{r}
+anova(spruce.lm)
+```
+
+```{r}
+anova(quad.lm)
+```
+
+```{r}
+anova(spruce.lm, quad.lm)
+```
+
+
+## TSS, MSS, RSS
+
+```{r}
+height.qfit=fitted(quad.lm)
+```
+
+
+TSS: 
+
+```{r}
+TSS = with(spruce.df, sum((Height-mean(Height))^2))
+TSS
+```
+
+MSS: 
+
+```{r}
+MSS = with(spruce.df, sum((height.qfit-mean(Height))^2))
+MSS
+```
+
+RSS: 
+
+```{r}
+RSS=with(spruce.df, sum((Height-height.qfit)^2))
+RSS
+```
+
+## MSS/TSS
+
+```{r}
+MSS/TSS
+```
+
+# Task 6
+
+## Cooks plot: Unusual points
+
+```{r}
+cooks20x(quad.lm, main = "Cook's distance plot")
+```
+
+## Cooks distance: Quadratic model and data
+
+Question: What does cooks distance for the quadratic model and data tell you?
+
+Answer: Cooks distance measures the change in regression analysis if a data point is deleted. Greater distance would imply greater impact. The distance is based on the data's impact on fitted response values. Therefore, cooks distance can be used to find the existence of outliers and determine the outliers. It can be used to a desired new model by suggesting which datum to be removed without large impact. 
+
+## Cooks distance: quad.lm
+
+
+Cooks distance for quad.lm indicates that the 24th datum has the largest impact, which could also be seen from it having the tallest height on the cook's distance plot. 
+
+## quad2.lm object
+
+```{r}
+quad2.lm=lm(Height~BHDiameter + I(BHDiameter^2) , data=spruce.df[-24,])
+```
+
+## Summary quad2.m object
+
+```{r}
+summary(quad2.lm)
+```
+
+## Comparison with quad.lm
+
+```{r}
+summary(quad.lm)
+```
+
+quad2.lm have larger multiple-R-squared and adjuested-R-squares values than quad.lm. 
+
+On the other hand, quad2.lm has smaller min, max and median than quad.lm. 
+
+
+## Conclusion
+
+The 24th datum was the most influential impact in the model as indicated in the Cooks Distance plot. Therefore, R-squared value increases after removing the datum. 
+
+# Task 7
+
+## Proof
+
+Let the two given lines be $$l1$$ and $$l2$$. 
+
+We have the following formulae for the two lines.
+
+$$l1: y = \beta_0 + \beta_1x$$
+$$l2: y = \beta_0 + \delta + (\beta_1 + \beta_2)x$$
+At the change point $$x_k$$, the two lines intersect, 
+
+$$\beta_0 + \beta_1x = beta_0 + \delta + (\beta_1 + \beta_2)x_k$$
+Distribute $$x_k$$l, 
+
+$$\beta_0 + \beta_1x = \beta_0 + \delta + \beta_1 x_k+ \beta_2x_k$$
+Move right terms to the left side except for $$\delta$$ and cancel terms where possible, 
+
+$$\beta_0 - \beta_0 + \beta_1 x - \beta_1 x - \beta_2 x_k = \delta$$
+Finally we get, 
+
+$$\delta = - \beta_2 x_k $$
+Substitue $$\delta$$ in $$ls$$ for any $$x$$, 
+
+$$l2: y = \beta_0 + \delta + (\beta_1 + \beta_2)x$$
+$$l2: y = \beta_0 - \beta_2 x_k  + (\beta_1 + \beta_2)x$$
+Distribute the x,
+$$l2: y = \beta_0 - \beta_2 x_k  + \beta_1x + \beta_2 x$$
+Rearrange the equation, 
+
+$$l2: y = \beta_0 + \beta_1x + \beta_2 x - \beta_2 x_k  $$
+Factor $$\beta_2$$ we get, 
+
+$$l2: y = \beta_0 + \beta_1x + \beta_2 (x - x_k)  $$
+We have come to an $$l2$$ as an adjustment of $$l1$$. 
+Using an indicator function $$I$$ to know whether it should or should not adjust, we have
+
+$$l2: y = \beta_0 + \beta_1x + \beta_2 (x - x_k) I (x > x_k)$$
+where $$I()$$ is 1 if $$(x > x_k)$$ or else 0.
+
+## Reproduce proof using plot
+
+```{r}
+sp2.df=within(spruce.df, X<-(BHDiameter-18)*(BHDiameter>18))
+sp2.df
+```
+
+
+```{r}
+lmp=lm(Height~BHDiameter + X,data=sp2.df)
+tmp=summary(lmp)
+names(tmp)
+```
+
+```{r}
+myf = function(x,coef){
+  coef[1]+coef[2]*(x) + coef[3]*(x-18)*(x-18>0)
+}
+
+myf(0, coef=tmp$coefficients[,"Estimate"])
+```
+
+
+```{r}
+plot(spruce.df,main="Piecewise regression")
+curve(myf(x,coef=tmp$coefficients[,"Estimate"] ),add=TRUE, lwd=2,col="Blue")
+abline(v=18)
+text(18,16,paste("R sq.=",round(tmp$r.squared,4) ))
+```
+
+
+# Task 8
+
+The function myreadxls read in xls files. It can take a directory path or use the current directory as the default and read xls files as stated. 
+
+Coding with error saying "there is no package called ILAS2019"
+
+```{r}
+library(ILAS2019)
+
+dird = ""
+
+acc = myreadxls(dird, "ACCIDENTS.XLS")
+
+gal = myreadxls( dird, "GALAXY.XLS")
+
+sand =myreadxls(dird, "SANDSTONE.XLS")
+
+head(acc)
+
+head(gal)
+
+head(sand)
+```
+
+
+
+# Extra
+```{r}
+spruce = read.csv("SPRUCE.csv")
+plot(Height~BHDiameter, main = "Spruce height Prediction",
+     xlab = "Breast Height Diameter (cm)", ylab = "Height of Tree(m)",
+     pch = 21, bg = "blue", cex = 1.1,
+     data = spruce)
+curve(myplot, lwd = 2, col = "steelblue", add = TRUE)
+
+with(spruce, segments(BHDiameter, Height, BHDiameter, quad.lm$coef[1] + quad.lm$coef[2]*BHDiameter + quad.lm$coef[3]*BHDiameter^2, col = "Black"))
+
+lgcooks = spruce[c(18,21,24),]
+
+with(lgcooks, segments(BHDiameter, Height, BHDiameter, quad.lm$coef[1] + quad.lm$coef[2]*BHDiameter + quad.lm$coef[3]*BHDiameter^2, col = "Red", lwd = 3))
+
+with(spruce, text(Height~BHDiameter, labels = row.names(spruce), pos = 4, cex = 0.5))
+
+with(spruce, arrows(BHDiameter[18], Height[24], BHDiameter[24], Height[24], col = "blue", lwd = 2))
+
+with(spruce, text(BHDiameter[18], Height[24], labels = c("Highest Cook's\ndistance  "), pos = 2, cex = 1))
+```
+
+
+
+
+
